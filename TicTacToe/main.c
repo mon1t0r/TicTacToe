@@ -1,5 +1,6 @@
 #include <windows.h>
-#include <gl/gl.h>
+#include <glad/glad.h>
+#include "visual.h"
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -19,7 +20,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
     HGLRC hRC;
     MSG msg;
     BOOL bQuit = FALSE;
-    float theta = 0.0f;
 
     /* register window class */
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -57,6 +57,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     /* enable OpenGL for the window */
     EnableOpenGL(hwnd, &hDC, &hRC);
+    gladLoadGL();
 
     /* program main loop */
     while (!bQuit)
@@ -83,24 +84,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
             glClear(GL_COLOR_BUFFER_BIT);
 
             glPushMatrix();
-            glRotatef(theta, 0.0f, 0.0f, 1.0f);
 
-            glBegin(GL_TRIANGLES);
-
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glVertex2f(0.0f, 1.0f);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex2f(0.87f, -0.5f);
-            glColor3f(0.0f, 0.0f, 1.0f);
-            glVertex2f(-0.87f, -0.5f);
-
-            glEnd();
+            DrawGrid();
 
             glPopMatrix();
 
             SwapBuffers(hDC);
 
-            theta += 1.0f;
             Sleep(1);
         }
     }
