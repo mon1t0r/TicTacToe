@@ -8,6 +8,7 @@ LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
 void EnableOpenGL(HWND hwnd, HDC*, HGLRC*);
 void DisableOpenGL(HWND, HDC, HGLRC);
 
+void Rescale(int width, int height);
 
 int WINAPI WinMain(HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -53,11 +54,15 @@ int WINAPI WinMain(HINSTANCE hInstance,
         hInstance,
         NULL);
 
-    ShowWindow(hwnd, nCmdShow);
-
     /* enable OpenGL for the window */
     EnableOpenGL(hwnd, &hDC, &hRC);
     gladLoadGL();
+
+    ShowWindow(hwnd, nCmdShow);
+
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    Rescale(rect.right, rect.bottom);
 
     /* program main loop */
     while (!bQuit)
@@ -115,6 +120,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         return 0;
 
+    case WM_SIZE:
+        Rescale(LOWORD(lParam), HIWORD(lParam));
+        break;
+
     case WM_KEYDOWN:
     {
         switch (wParam)
@@ -171,3 +180,11 @@ void DisableOpenGL(HWND hwnd, HDC hDC, HGLRC hRC)
     ReleaseDC(hwnd, hDC);
 }
 
+void Rescale(int width, int height)
+{
+    glViewport(0, 0, width, height);
+    float ratio = width / (float)height;
+    float sz = 1.0;
+    glLoadIdentity();
+    glFrustum(-ratio * sz, ratio * sz, -sz, sz, 0, 10000);
+}
