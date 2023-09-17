@@ -44,7 +44,7 @@ void DrawMain()
             glPushMatrix();
 
                 glTranslatef(-1.0f + HALF_CELL_SIZE + HALF_CELL_SIZE * i * 2.0f, -1.0f + HALF_CELL_SIZE + HALF_CELL_SIZE * j * 2.0f, 0.0f);
-                glScalef(0.3f, 0.3f, 0.3f);
+                glScalef(HALF_CELL_SIZE, HALF_CELL_SIZE, HALF_CELL_SIZE);
 
                 DrawCell(matrix[i][j]);
 
@@ -124,20 +124,24 @@ void DrawCross()
 {
     glColor3f(1.0f, 0.3f, 0.3f);
 
-    glScalef(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
 
-    glBegin(GL_LINES);
+        glScalef(0.7f, 0.7f, 0.7f);
 
-        glVertex2f(-1.0f, 1.0f); glVertex2f(1.0f, -1.0f);
-        glVertex2f(-1.0f, -1.0f); glVertex2f(1.0f, 1.0f);
+        glBegin(GL_LINES);
 
-    glEnd();
+            glVertex2f(-1.0f, 1.0f); glVertex2f(1.0f, -1.0f);
+            glVertex2f(-1.0f, -1.0f); glVertex2f(1.0f, 1.0f);
+
+        glEnd();
+
+    glPopMatrix();
 }
 
 void DrawZero()
 {
     glColor3f(0.3f, 0.3f, 1.0f);
-    DrawCircle(CELL_SIZE, 30);
+    DrawCircle(0.66f, 30);
 }
 
 void DrawCircle(float radius, int segments)
