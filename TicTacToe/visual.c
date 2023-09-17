@@ -18,3 +18,9 @@ void DrawGrid()
 
     glEnd();
 }
+
+void Rescale(int width, int height)
+{
+    int size = width > height ? height : width;
+    glViewport((width - size) / 2, (height - size) / 2, size, size);
+}
