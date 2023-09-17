@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <glad/glad.h>
 #include "visual.h"
+#include "game.h"
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -45,12 +46,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        700,
-        700,
+        720,
+        720,
         NULL,
         NULL,
         hInstance,
         NULL);
+
+    InitializeGame();
 
     /* enable OpenGL for the window */
     EnableOpenGL(hwnd, &hDC, &hRC);
