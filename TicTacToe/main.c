@@ -143,6 +143,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case 0x52:
             InitializeGame();
             break;
+        case VK_F1:
+            ChangeAIType();
+            break;
         }
     }
 

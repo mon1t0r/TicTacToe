@@ -88,6 +88,26 @@ void DrawMain()
 
         glEnd();
     }
+
+    switch (aiType)
+    {
+    case Easy:
+        glColor3f(0.2f, 1.0f, 0.2f);
+        break;
+    case Medium:
+        glColor3f(1.0f, 0.5f, 0.0f);
+        break;
+    case Hard:
+        glColor3f(1.0f, 0.2f, 0.2f);
+        break;
+    }
+
+    glBegin(GL_TRIANGLE_STRIP);
+
+        glVertex2f(-1.0f, 1.0f); glVertex2f(-0.9f, 1.0f);
+        glVertex2f(-1.0f, 0.95f); glVertex2f(-0.9f, 0.95f);
+
+    glEnd();
 }
 
 void DrawCell(CellState state)

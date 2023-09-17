@@ -5,12 +5,11 @@
 #define PLAYER_SIGN Cross
 #define COMPUTER_SIGN Zero
 
-typedef enum { Easy = 0, Medium = 1, Hard = 2 } AIType;
-
 CellState matrix[FIELD_SIZE][FIELD_SIZE];
 
 GameOverType gameOverType;
 short gameOverInfo;
+AIType aiType = Hard;
 
 void PerformComputerMove(AIType);
 void CheckGameOver();
@@ -23,6 +22,13 @@ void InitializeGame()
 			matrix[i][j] = Empty;
 	gameOverType = NoGameOver;
 	gameOverInfo = 0;
+}
+
+void ChangeAIType()
+{
+	aiType++;
+	if (aiType > Hard)
+		aiType = Easy;
 }
 
 void SetCellState(int xCell, int yCell, CellState state)
@@ -53,14 +59,24 @@ void HandleMouseClick(int mouseX, int mouseY, int viewport[4])
 	int xCell = (int)(FIELD_SIZE * x);
 	int yCell = (int)(FIELD_SIZE * y);
 
-	if (GetCellState(xCell, yCell))
+	if (xCell >= FIELD_SIZE || yCell >= FIELD_SIZE || GetCellState(xCell, yCell))
 		return;
 
 	SetCellState(xCell, yCell, PLAYER_SIGN);
 
 	CheckGameOver();
 
-	PerformComputerMove(Hard);
+	AIType ai = aiType;
+
+	if (ai == Medium)
+	{
+		if (rand() % 3 == 0)
+			ai = Easy;
+		else
+			ai = Hard;
+	}
+
+	PerformComputerMove(ai);
 }
 
 int CheckComputerLine(bool horizontal, CellState stateNoDanger)
