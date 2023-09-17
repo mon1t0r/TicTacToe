@@ -91,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             glPushMatrix();
 
-            DrawGrid();
+                DrawGrid();
 
             glPopMatrix();
 
@@ -124,6 +124,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         Rescale(LOWORD(lParam), HIWORD(lParam));
         break;
+
+    case WM_LBUTTONDOWN:
+    {
+        int viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        HandleMouseClick(LOWORD(lParam), HIWORD(lParam), viewport);
+        break;
+    }
 
     case WM_KEYDOWN:
     {
