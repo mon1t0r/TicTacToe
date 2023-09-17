@@ -9,8 +9,8 @@ typedef enum { Easy = 0, Medium = 1, Hard = 2 } AIType;
 
 CellState matrix[FIELD_SIZE][FIELD_SIZE];
 
-GameOverType gameOverType = NoGameOver;
-short gameOverInfo = 0;
+GameOverType gameOverType;
+short gameOverInfo;
 
 void PerformComputerMove(AIType);
 void CheckGameOver();
@@ -21,6 +21,8 @@ void InitializeGame()
 	for (int i = 0; i < FIELD_SIZE; ++i)
 		for (int j = 0; j < FIELD_SIZE; ++j)
 			matrix[i][j] = Empty;
+	gameOverType = NoGameOver;
+	gameOverInfo = 0;
 }
 
 void SetCellState(int xCell, int yCell, CellState state)
@@ -58,7 +60,86 @@ void HandleMouseClick(int mouseX, int mouseY, int viewport[4])
 
 	CheckGameOver();
 
-	PerformComputerMove(Easy);
+	PerformComputerMove(Hard);
+}
+
+int CheckComputerLine(bool horizontal, CellState stateNoDanger)
+{
+	for (int i = 0; i < FIELD_SIZE; ++i)
+	{
+		int dangerCellIndex = -1;
+		for (int j = 0; j < FIELD_SIZE; ++j)
+		{
+			CellState state = horizontal ? matrix[j][i] : matrix[i][j];
+			if (!state)
+				dangerCellIndex = dangerCellIndex == -1 ? j : -2;
+			else if (state == stateNoDanger)
+				dangerCellIndex = -2;
+		}
+		if (dangerCellIndex >= 0)
+			return (i << 16) | dangerCellIndex;
+	}
+	return -1;
+}
+
+int CheckComputerDiagonal(bool up, CellState stateNoDanger)
+{
+	int dangerCellIndex = -1;
+	for (int i = 0; i < FIELD_SIZE; ++i)
+	{
+		CellState state = up ? matrix[i][i] : matrix[i][FIELD_SIZE - i - 1];
+		if (!state)
+			dangerCellIndex = dangerCellIndex == -1 ? i : -2;
+		else if (state == stateNoDanger)
+			dangerCellIndex = -2;
+	}
+	if (dangerCellIndex >= 0)
+		return dangerCellIndex;
+	return -1;
+}
+
+bool PerformSmartMove(CellState stateNoDanger)
+{
+	int index;
+	bool flag;
+
+	index = CheckComputerLine(flag = false, stateNoDanger);
+	if (index < 0)
+		index = CheckComputerLine(flag = true, stateNoDanger);
+	if (index >= 0)
+	{
+		int i = (index >> 16) & 0xFFFF;
+		int j = index & 0xFFFF;
+		if (flag)
+			SetCellState(j, i, COMPUTER_SIGN);
+		else
+			SetCellState(i, j, COMPUTER_SIGN);
+		return true;
+	}
+
+	index = CheckComputerDiagonal(flag = false, stateNoDanger);
+	if (index < 0)
+		index = CheckComputerDiagonal(flag = true, stateNoDanger);
+	if (index >= 0)
+	{
+		if (flag)
+			SetCellState(index, index, COMPUTER_SIGN);
+		else
+			SetCellState(index, FIELD_SIZE - index - 1, COMPUTER_SIGN);
+		return true;
+	}
+
+	return false;
+}
+
+bool SetComputerCellIfEmpty(int xCell, int yCell)
+{
+	if (!GetCellState(xCell, yCell))
+	{
+		SetCellState(xCell, yCell, COMPUTER_SIGN);
+		return true;
+	}
+	return false;
 }
 
 void PerformComputerMove(AIType type)
@@ -76,15 +157,49 @@ void PerformComputerMove(AIType type)
 				if (!matrix[i][j])
 					emptyCells[emptyCellsCount++] = (i << 16) | j;
 
-		int cell = emptyCells[rand() % emptyCellsCount];
+		if (emptyCellsCount)
+		{
+			int cell = emptyCells[rand() % emptyCellsCount];
 
-		int i = (cell >> 16) & 0xFFFF;
-		int j = cell & 0xFFFF;
+			int i = (cell >> 16) & 0xFFFF;
+			int j = cell & 0xFFFF;
 
-		SetCellState(i, j, COMPUTER_SIGN);
+			SetCellState(i, j, COMPUTER_SIGN);
+		}
+		CheckGameOver();
 	}
+	else
+	{
+		if (PerformSmartMove(PLAYER_SIGN))
+		{
+			CheckGameOver();
+			return;
+		}
 
-	CheckGameOver();
+		if (PerformSmartMove(COMPUTER_SIGN))
+		{
+			CheckGameOver();
+			return;
+		}
+
+		if (SetComputerCellIfEmpty(FIELD_SIZE / 2, FIELD_SIZE / 2))
+		{
+			CheckGameOver();
+			return;
+		}
+
+		if (SetComputerCellIfEmpty(0, 0) || 
+			SetComputerCellIfEmpty(FIELD_SIZE - 1, 0) ||
+			SetComputerCellIfEmpty(0, FIELD_SIZE - 1) ||
+			SetComputerCellIfEmpty(FIELD_SIZE - 1, FIELD_SIZE - 1))
+		{
+			CheckGameOver();
+			return;
+		}
+
+		PerformComputerMove(Easy);
+		return;
+	}
 }
 
 void PerformGameOver(GameOverType type, int info, CellState winner)
@@ -140,15 +255,15 @@ bool CheckGameOverDiagonal(bool up)
 
 void CheckGameOver()
 {
-	if (CheckGameOverLine(false))
+	if (CheckGameOverLine(false) == -1)
 		return;
 
-	if (CheckGameOverLine(true))
+	if (CheckGameOverLine(true) == -1)
 		return;
 
-	if (CheckGameOverDiagonal(false))
+	if (CheckGameOverDiagonal(false) == -1)
 		return;
 
-	if (CheckGameOverDiagonal(true))
+	if (CheckGameOverDiagonal(true) == -1)
 		return;
 }

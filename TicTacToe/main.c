@@ -140,8 +140,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case VK_ESCAPE:
             PostQuitMessage(0);
             break;
+        case 0x52:
+            InitializeGame();
+            break;
         }
     }
+
     break;
 
     default:
