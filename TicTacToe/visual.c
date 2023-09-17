@@ -17,7 +17,7 @@ void DrawCross();
 void DrawZero();
 void DrawCircle(float, int);
 
-void DrawGrid()
+void DrawMain()
 {
     glLineWidth(2.0f);
 
@@ -50,6 +50,44 @@ void DrawGrid()
 
             glPopMatrix();
         }
+
+    if (gameOverType)
+    {
+        glColor3f(0.3f, 1.0f, 0.3f);
+        glBegin(GL_LINES);
+
+        switch (gameOverType)
+        {
+        case Horizontal:
+        {
+            float y = -1.0f + HALF_CELL_SIZE + HALF_CELL_SIZE * gameOverInfo * 2.0f;
+            glVertex2f(-1.0f, y); glVertex2f(1.0f, y);
+            break;
+        }
+
+        case Vertical:
+        {
+            float x = -1.0f + HALF_CELL_SIZE + HALF_CELL_SIZE * gameOverInfo * 2.0f;
+            glVertex2f(x, -1.0f); glVertex2f(x, 1.0f);
+            break;
+        }
+
+        case Diagonal:
+        {
+            if (gameOverInfo)
+            {
+                glVertex2f(-1.0f, -1.0f); glVertex2f(1.0f, 1.0f);
+            }
+            else
+            {
+                glVertex2f(-1.0f, 1.0f); glVertex2f(1.0f, -1.0f);
+            }
+            break;
+        }
+        }
+
+        glEnd();
+    }
 }
 
 void DrawCell(CellState state)

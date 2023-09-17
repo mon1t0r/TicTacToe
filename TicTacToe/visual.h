@@ -1,4 +1,4 @@
 #pragma once
 
-void DrawGrid();
+void DrawMain();
 void Rescale(int, int);

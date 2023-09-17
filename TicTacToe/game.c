@@ -5,8 +5,12 @@
 #define PLAYER_SIGN Cross
 #define COMPUTER_SIGN Zero
 
+typedef enum { Easy = 0, Medium = 1, Hard = 2 } AIType;
+
 CellState matrix[FIELD_SIZE][FIELD_SIZE];
-bool isGameOver = false;
+
+GameOverType gameOverType = NoGameOver;
+short gameOverInfo = 0;
 
 void PerformComputerMove(AIType);
 void CheckGameOver();
@@ -16,7 +20,7 @@ void InitializeGame()
 	srand(time());
 	for (int i = 0; i < FIELD_SIZE; ++i)
 		for (int j = 0; j < FIELD_SIZE; ++j)
-			matrix[i][j] = None;
+			matrix[i][j] = Empty;
 }
 
 void SetCellState(int xCell, int yCell, CellState state)
@@ -29,13 +33,13 @@ void SetCellState(int xCell, int yCell, CellState state)
 CellState GetCellState(int xCell, int yCell)
 {
 	if (xCell < 0 || xCell >= FIELD_SIZE || yCell < 0 || yCell >= FIELD_SIZE)
-		return None;
+		return Empty;
 	return matrix[xCell][yCell];
 }
 
 void HandleMouseClick(int mouseX, int mouseY, int viewport[4])
 {
-	if (isGameOver)
+	if (gameOverType)
 		return;
 
 	float x = (mouseX - viewport[0]) / (float)viewport[2];
@@ -59,7 +63,7 @@ void HandleMouseClick(int mouseX, int mouseY, int viewport[4])
 
 void PerformComputerMove(AIType type)
 {
-	if (isGameOver)
+	if (gameOverType)
 		return;
 
 	if (type == Easy)
@@ -83,20 +87,68 @@ void PerformComputerMove(AIType type)
 	CheckGameOver();
 }
 
-void CheckGameOver()
+void PerformGameOver(GameOverType type, int info, CellState winner)
 {
-	bool gameOver = true;
+	gameOverType = type;
+	gameOverInfo = info;
+}
 
-	for (int i = 0; gameOver && i < FIELD_SIZE; ++i)
+bool CheckGameOverLine(bool horizontal)
+{
+	for (int i = 0; i < FIELD_SIZE; ++i)
+	{
+		CellState colState = Empty;
 		for (int j = 0; j < FIELD_SIZE; ++j)
 		{
-			if (!matrix[i][j])
+			CellState state = horizontal ? matrix[j][i] : matrix[i][j];
+			if (!state || (colState != Empty && state != colState))
 			{
-				gameOver = false;
+				colState = Empty;
 				break;
 			}
+			colState = state;
 		}
+		if (colState)
+		{
+			PerformGameOver(horizontal ? Horizontal : Vertical, i, colState);
+			return true;
+		}
+	}
+	return false;
+}
 
-	if (gameOver)
-		isGameOver = true;
+bool CheckGameOverDiagonal(bool up)
+{
+	CellState colState = Empty;
+	for (int i = 0; i < FIELD_SIZE; ++i)
+	{
+		CellState state = up ? matrix[i][i] : matrix[i][FIELD_SIZE - i - 1];
+		if (!state || (colState != Empty && state != colState))
+		{
+			colState = Empty;
+			break;
+		}
+		colState = state;
+	}
+	if (colState)
+	{
+		PerformGameOver(Diagonal, up, colState);
+		return true;
+	}
+	return false;
+}
+
+void CheckGameOver()
+{
+	if (CheckGameOverLine(false))
+		return;
+
+	if (CheckGameOverLine(true))
+		return;
+
+	if (CheckGameOverDiagonal(false))
+		return;
+
+	if (CheckGameOverDiagonal(true))
+		return;
 }

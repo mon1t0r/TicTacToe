@@ -91,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             glPushMatrix();
 
-                DrawGrid();
+                DrawMain();
 
             glPopMatrix();
 
